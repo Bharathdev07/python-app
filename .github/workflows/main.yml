@@ -26,24 +26,20 @@ jobs:
         uses: actions/setup-java@v3
         with:
           java-version: '17'
-          distribution: 'temurin'  # Use temurin instead of adoptopenjdk
+          distribution: 'temurin'  # Ensure using Java 17 (AdoptOpenJDK is now Temurin)
 
       - name: SonarQube Scan (SonarScanner)
-        uses: SonarSource/sonarqube-scan-action@7295e71c9583053f5bf40e9d4068a0c974603ec8
+        uses: SonarSource/sonarqube-scan-action@v3  # Using the latest stable version
         with:
-          sonar-project-key: ${{ secrets.SONAR_PROJECT_KEY }}  # Ensure the project key is correct
+          args: |
+            -Dsonar.projectKey=${{ secrets.SONAR_PROJECT_KEY }}  # Ensure the project key is correct
+            -Dsonar.sources=.
+            -Dsonar.host.url=$SONAR_HOST_URL
+            -Dsonar.login=$SONAR_TOKEN
+            -Dsonar.python.coverage.reportPaths=coverage.xml  # Adjust path if required
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-          SONAR_HOST_URL: "https://sonarcloud.io"  # Adjust if using self-hosted SonarQube
-
-      - name: SonarScanner Scan
-        run: |
-          sonar-scanner \
-            -Dsonar.projectKey=${{ secrets.SONAR_PROJECT_KEY }} \
-            -Dsonar.sources=. \
-            -Dsonar.host.url=$SONAR_HOST_URL \
-            -Dsonar.login=$SONAR_TOKEN \
-            -Dsonar.python.coverage.reportPaths=coverage.xml
+          SONAR_HOST_URL: "https://sonarcloud.io"  # Or your self-hosted SonarQube server URL
 
   build-and-push:
     name: Build and Push Docker Image
@@ -60,4 +56,3 @@ jobs:
 
       - name: Push Docker Image
         run: docker push ${{ secrets.DOCKER_USERNAME }}/python-app:latest
-
