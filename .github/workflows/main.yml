@@ -3,7 +3,7 @@ name: Python CI/CD with SonarQube and Docker Push
 on:
   push:
     branches:
-      - main  # Adjust this based on your branch
+      - master
 
 jobs:
   sonarqube:
