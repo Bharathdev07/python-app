@@ -3,7 +3,7 @@ name: Python CI/CD with SonarQube and Docker Push
 on:
   push:
     branches:
-      - master
+      - master  # Adjust this based on your branch
 
 jobs:
   sonarqube:
@@ -22,10 +22,15 @@ jobs:
         run: |
           pip install -r requirements.txt
 
-      - name: SonarQube Scan
+      - name: SonarQube Scan (SonarScanner)
+        uses: SonarSource/sonarqube-scan-action@7295e71c9583053f5bf40e9d4068a0c974603ec8
+        with:
+          sonar-project-key: ${{ secrets.SONAR_PROJECT_KEY }}  # Ensure the project key is correct
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           SONAR_HOST_URL: "https://sonarcloud.io"  # Adjust if using self-hosted SonarQube
+
+      - name: SonarScanner Scan
         run: |
           sonar-scanner \
             -Dsonar.projectKey=${{ secrets.SONAR_PROJECT_KEY }} \
@@ -34,10 +39,10 @@ jobs:
             -Dsonar.login=$SONAR_TOKEN \
             -Dsonar.python.coverage.reportPaths=coverage.xml
 
+ 
   build-and-push:
     name: Build and Push Docker Image
     runs-on: ubuntu-latest
-    needs: sonarqube
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
@@ -50,4 +55,3 @@ jobs:
 
       - name: Push Docker Image
         run: docker push ${{ secrets.DOCKER_USERNAME }}/python-app:latest
-
